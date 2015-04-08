@@ -1829,8 +1829,15 @@ var keyHandlers = {
             if ( previous ) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
-                    detach( previous );
-                    return;
+                        if (/svg|use|g|script/.test(previous.nodeName) 
+                            && current.previousSibling 
+                            && !current.previousSibling.contenteditable) {
+                                detach(current.previousSibling);
+                                return;
+                        } else {
+                            detach( previous );
+                            return;
+                        }
                 }
                 // Otherwise merge.
                 mergeWithBlock( previous, current, range );

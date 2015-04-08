@@ -2557,17 +2557,7 @@ var cleanupBRs = function ( root ) {
 
 proto._ensureBottomLine = function () {
     var body = this._body,
-        last;
-    // Safari (+others?) adds white-space text nodes to the end of <body>
-    // for no apparent reason. Remove them, since they're semantically
-    // meaningless.
-    while ( last = body.lastChild ) {
-        if ( last.nodeType === TEXT_NODE && !notWS.test( last.data ) ) {
-            body.removeChild( last );
-        } else {
-            break;
-        }
-    }
+        last = body.lastElementChild;
     if ( !last || last.nodeName !== this.defaultBlockTag || !isBlock( last ) ) {
         body.appendChild( this.createDefaultBlock() );
     }
@@ -2929,8 +2919,15 @@ var keyHandlers = {
             if ( previous ) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
-                    detach( previous );
-                    return;
+                        if (/svg|use|g|script/.test(previous.nodeName) 
+                            && current.previousSibling 
+                            && !current.previousSibling.contenteditable) {
+                                detach(current.previousSibling);
+                                return;
+                        } else {
+                            detach( previous );
+                            return;
+                        }
                 }
                 // Otherwise merge.
                 mergeWithBlock( previous, current, range );
