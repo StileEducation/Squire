@@ -2,6 +2,18 @@
 
 var instances = [];
 
+function getSquireInstance ( doc ) {
+    var l = instances.length,
+        instance;
+    while ( l-- ) {
+        instance = instances[l];
+        if ( instance._doc === doc ) {
+            return instance;
+        }
+    }
+    return null;
+}
+
 function Squire ( doc ) {
     var win = doc.defaultView;
     var body = doc.body;
@@ -341,7 +353,7 @@ proto._updatePath = function ( range, force ) {
             this.fireEvent( 'pathChange', { path: newPath } );
         }
     }
-    if ( anchor !== focus ) {
+    if ( !range.collapsed ) {
         this.fireEvent( 'select' );
     }
 };
@@ -1455,7 +1467,7 @@ var cleanupBRs = function ( root ) {
 
 proto._ensureBottomLine = function () {
     var body = this._body,
-        last = body.lastChild;
+        last = body.lastElementChild;
     if ( !last || last.nodeName !== this.defaultBlockTag || !isBlock( last ) ) {
         body.appendChild( this.createDefaultBlock() );
     }
@@ -1817,8 +1829,15 @@ var keyHandlers = {
             if ( previous ) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
-                    detach( previous );
-                    return;
+                        if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
+                            && current.previousSibling 
+                            && !current.previousSibling.contenteditable) {
+                                detach(current.previousSibling);
+                                return;
+                        } else {
+                            detach( previous );
+                            return;
+                        }
                 }
                 // Otherwise merge.
                 mergeWithBlock( previous, current, range );
