@@ -3462,14 +3462,6 @@ proto.removeList = command( 'modifyBlocks', removeList );
 proto.increaseListLevel = command( 'modifyBlocks', increaseListLevel );
 proto.decreaseListLevel = command( 'modifyBlocks', decreaseListLevel );
 
-if ( top !== win ) {
-    win.editor = new Squire( doc );
-    if ( win.onEditorLoad ) {
-        win.onEditorLoad( win.editor );
-        win.onEditorLoad = null;
-    }
-} else {
-    win.Squire = Squire;
-}
+win.Squire = Squire;
 
 }( document ) );
