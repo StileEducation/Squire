@@ -2919,7 +2919,7 @@ var keyHandlers = {
             if ( previous ) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
-                        if (/svg|use|g|SCRIPT/.test(previous.nodeName) 
+                        if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
                             && current.previousSibling 
                             && !current.previousSibling.contenteditable) {
                                 detach(current.previousSibling);
