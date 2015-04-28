@@ -1868,9 +1868,11 @@ var keyHandlers = {
                 self._updatePath( range, true );
             }
         }
-        // Otherwise, leave to browser but check afterwards whether it has
-        // left behind an empty inline tag.
         else {
+            if (/svg|use|g|SCRIPT|span/i.test(range.commonAncestorContainer.parentElement)){
+                detach(range.commonAncestorContainer.parentElement);
+                return;
+            }
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
         }
