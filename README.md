@@ -47,6 +47,12 @@ By default, the editor will use a `<div>` for blank lines, as most users have be
 
 You can also set an object of attributes to apply to each default block node by setting the *defaultBlockProperties* property, e.g. `editor.defaultBlockProperties = { style: 'font-size: 16px;' }`.
 
+### Determining button state
+
+If you are adding a UI to Squire, you'll probably want to show a button in different states depending on whether a particular style is active in the current selection or not. For example, a "Bold" button would be in a depressed state if the text under the cursor is already bold.
+
+The efficient way to determine the state for most buttons is to monitor the "pathChange" event in the editor, and determine the state from the new path. If the selection goes across nodes, you will need to call the `hasFormat` method for each of your buttons to determine whether the styles are active. See the `getPath` and `hasFormat` documentation for more information.
+
 License
 -------
 
@@ -85,6 +91,20 @@ The method takes two arguments:
 
 * **type**: The event type the handler was registered for.
 * **handler**: The handler to remove.
+
+Returns self (the Squire instance).
+
+### setKeyHandler
+
+Adds or removes a keyboard shortcut. You can use this to override the default keyboard shortcuts (e.g. Ctrl-B for bold – see the bottom of KeyHandlers.js for the list).
+
+This method takes two arguments:
+
+* **key**: The key to handle, including any modifiers in alphabetical order. e.g. `"alt-ctrl-meta-shift-enter"`
+* **fn**: The function to be called when this key is pressed, or `null` if removing a key handler. The function will be passed three arguments when called:
+  * **self**: A reference to the Squire instance.
+  * **event**: The key event object.
+  * **range**: A Range object representing the current selection.
 
 Returns self (the Squire instance).
 
@@ -135,6 +155,16 @@ The method takes one argument:
 * **src**: The source path for the image.
 
 Returns a reference to the newly inserted image element.
+
+### insertHTML
+
+Inserts an HTML fragment at the current cursor location, or replaces the selection if selected. The value supplied should not contain `<body>` tags or anything outside of that.
+
+The method takes one argument:
+
+* **html**: The html to insert.
+
+Returns self (the Squire instance).
 
 ### getPath
 
