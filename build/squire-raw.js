@@ -3311,6 +3311,8 @@ var keyHandlers = {
         // Record undo checkpoint.
         self._recordUndoState( range );
         self._getRangeAndRemoveBookmark( range );
+
+        var checkInSVG = /svg|use|g|SCRIPT/i;
         // If not collapsed, delete contents
         if ( !range.collapsed ) {
             event.preventDefault();
@@ -3323,21 +3325,24 @@ var keyHandlers = {
             var current = getStartBlockOfRange( range ),
                 previous = current && getPreviousBlock( current );
             // Must not be at the very beginning of the text area.
-            if ( previous && previous.nodeName && /svg|use|g|SCRIPT/i.test(previous.nodeName)) {
+            if ( previous && previous.nodeName && checkInSVG.test(previous.nodeName)) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
-                        if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
+                        if (checkInSVG.test(previous.nodeName)
                             && current.previousSibling 
                             && !current.previousSibling.contenteditable) {
+                            // assuming we are in an svg
                                 if (current.previousSibling.querySelector('.mathjax')) {
+                                    //and there is mathjax, remove the equation completley.
                                     detach(current.previousSibling.querySelector('.mathjax'));
+                                    // create a cursor range at the end of the previous line.
                                     var cursorRange = new Range();
                                     cursorRange.setEndAfter(range.commonAncestorContainer.previousElementSibling.lastChild);
                                     cursorRange.setEndBefore(range.commonAncestorContainer.previousElementSibling.lastChild);
                                     self.setSelection(cursorRange);
                                     
                                     if (current.childNodes.length && /BR/i.test(current.lastChild.nodeName)){
-                                        detach(current);
+                                        detach(current); // if the line is empty, delete it.
                                     }
                                 } else {
                                     detach( current.previousSibling);
@@ -3378,7 +3383,7 @@ var keyHandlers = {
             }
         }
         else {
-            if (/svg|use|g|SCRIPT|span/i.test(range.commonAncestorContainer.parentElement)){
+            if (checkInSVG.test(range.commonAncestorContainer.parentElement)){
                 detach(range.commonAncestorContainer.parentElement);
                 return;
             }
