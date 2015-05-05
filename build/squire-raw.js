@@ -3323,7 +3323,7 @@ var keyHandlers = {
             var current = getStartBlockOfRange( range ),
                 previous = current && getPreviousBlock( current );
             // Must not be at the very beginning of the text area.
-            if ( previous && previous.nodeName || /svg|use|g|SCRIPT/i.test(previous.nodeName)) {
+            if ( previous && previous.nodeName && /svg|use|g|SCRIPT/i.test(previous.nodeName)) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
                         if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
