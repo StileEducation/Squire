@@ -3323,7 +3323,7 @@ var keyHandlers = {
             var current = getStartBlockOfRange( range ),
                 previous = current && getPreviousBlock( current );
             // Must not be at the very beginning of the text area.
-            if ( previous ) {
+            if ( previous && previous.nodeName || /svg|use|g|SCRIPT/i.test(previous.nodeName)) {
                 // If not editable, just delete whole block.
                 if ( !previous.isContentEditable ) {
                         if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
@@ -3331,6 +3331,14 @@ var keyHandlers = {
                             && !current.previousSibling.contenteditable) {
                                 if (current.previousSibling.querySelector('.mathjax')) {
                                     detach(current.previousSibling.querySelector('.mathjax'));
+                                    var cursorRange = new Range();
+                                    cursorRange.setEndAfter(range.commonAncestorContainer.previousElementSibling.lastChild);
+                                    cursorRange.setEndBefore(range.commonAncestorContainer.previousElementSibling.lastChild);
+                                    self.setSelection(cursorRange);
+                                    
+                                    if (current.childNodes.length && /BR/i.test(current.lastChild.nodeName)){
+                                        detach(current);
+                                    }
                                 } else {
                                     detach( current.previousSibling);
                                 }
