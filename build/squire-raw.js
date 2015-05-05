@@ -3329,7 +3329,11 @@ var keyHandlers = {
                         if (/svg|use|g|SCRIPT/i.test(previous.nodeName)
                             && current.previousSibling 
                             && !current.previousSibling.contenteditable) {
-                                detach(current.previousSibling);
+                                if (current.previousSibling.querySelector('.mathjax')) {
+                                    detach(current.previousSibling.querySelector('.mathjax'));
+                                } else {
+                                    detach( current.previousSibling);
+                                }
                                 return;
                         } else {
                             detach( previous );
