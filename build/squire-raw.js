@@ -3323,37 +3323,15 @@ var keyHandlers = {
         else if ( rangeDoesStartAtBlockBoundary( range ) ) {
             event.preventDefault();
             var current = getStartBlockOfRange( range ),
-                previous = current && getPreviousBlock( current );
-            // Must not be at the very beginning of the text area.
-            if ( previous && previous.nodeName && checkInSVG.test(previous.nodeName)) {
-                // If not editable, just delete whole block.
-                if ( !previous.isContentEditable ) {
-                        if (checkInSVG.test(previous.nodeName)
-                            && current.previousSibling 
-                            && !current.previousSibling.contenteditable) {
-                            // assuming we are in an svg
-                                if (current.previousSibling.querySelector('.mathjax')) {
-                                    //and there is mathjax, remove the equation completley.
-                                    detach(current.previousSibling.querySelector('.mathjax'));
-                                    // create a cursor range at the end of the previous line.
-                                    var cursorRange = new Range();
-                                    cursorRange.setEndAfter(range.commonAncestorContainer.previousElementSibling.lastChild);
-                                    cursorRange.setEndBefore(range.commonAncestorContainer.previousElementSibling.lastChild);
-                                    self.setSelection(cursorRange);
-                                    
-                                    if (current.childNodes.length && /BR/i.test(current.lastChild.nodeName)){
-                                        detach(current); // if the line is empty, delete it.
-                                    }
-                                } else {
-                                    detach( current.previousSibling);
-                                }
-                                return;
-                        } else {
-                            detach( previous );
-                            return;
-                        }
+            previous = current && getPreviousBlock( current );
+        // Must not be at the very beginning of the text area.
+            if ( previous ) {
+                // If the block on the line above is not editable, delete it.
+                if ( !previous.isContentEditable && !checkInSVG.test(previous.nodeName) ) {
+                        detach( previous );
+                        return;
                 }
-                // Otherwise merge.
+                // Otherwise merge it.
                 mergeWithBlock( previous, current, range );
                 // If deleted line between containers, merge newly adjacent
                 // containers.
@@ -3364,7 +3342,28 @@ var keyHandlers = {
                 if ( current && ( current = current.nextSibling ) ) {
                     mergeContainers( current );
                 }
-                self.setSelection( range );
+                // Get the common ancestor of the range.
+                var ancestor = range.commonAncestorContainer;
+                
+                /*  Check if the common element to the range passed contained a mathjax block? If it didn't and was a svg 
+                    element we treat it as an element that is a decendant of a <svg>. We loop up the tree until we find an 
+                    element with the mathjax class and then use that to set the caret after the equation.
+                */
+                if (ancestor.querySelector && !ancestor.querySelector("mathjax") && checkInSVG.test(range.commonAncestorContainer)) {
+                    var mathjaxParent = range.commonAncestorContainer;
+                    // Loop up the tree to find the equation.
+                    while ( mathjaxParent.className != "mathjax") {
+                         mathjaxParent = mathjaxParent.parentNode;
+                    }
+
+                    var spanRange = new Range();
+                    spanRange.setEndAfter(mathjaxParent);
+
+                    self.setSelection(spanRange);
+                } else {
+                    // otherwise set the seletion to the range.
+                    self.setSelection( range );
+                }
             }
             // If at very beginning of text area, allow backspace
             // to break lists/blockquote.
@@ -3384,8 +3383,8 @@ var keyHandlers = {
         }
         else {
             if (checkInSVG.test(range.commonAncestorContainer.parentElement)){
+                event.preventDefault();
                 detach(range.commonAncestorContainer.parentElement);
-                return;
             }
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
