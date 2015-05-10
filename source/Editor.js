@@ -1922,10 +1922,10 @@ var keyHandlers = {
                 var ancestor = range.commonAncestorContainer;
                 
                 /*  Check if the common element to the range passed contained a mathjax block? If it didn't and was a svg 
-                    element we treat it as an element that is a decendant of a <svg>. We loop up the tree until we find an 
+                    element we treat it as an element that is a descendant of a <svg>. We loop up the tree until we find an 
                     element with the mathjax class and then use that to set the caret after the equation.
                 */
-                if (ancestor.querySelector && !ancestor.querySelector("mathjax") && checkInSVG.test(range.commonAncestorContainer)) {
+                if (ancestor.querySelector && !ancestor.querySelector("mathjax") && checkInSVG.test(ancestor)) {
                     var mathjaxParent = range.commonAncestorContainer;
                     // Loop up the tree to find the equation.
                     while ( mathjaxParent.className != "mathjax") {
