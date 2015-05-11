@@ -3349,7 +3349,7 @@ var keyHandlers = {
                     element we treat it as an element that is a descendant of a <svg>. We loop up the tree until we find an 
                     element with the mathjax class and then use that to set the caret after the equation.
                 */
-                if (ancestor.querySelector && !ancestor.querySelector("mathjax") && checkInSVG.test(ancestor)) {
+                if (ancestor.querySelector && !ancestor.querySelector("mathjax") && ancestor.nodeName && checkInSVG.test(ancestor.nodeName)) {
                     var mathjaxParent = range.commonAncestorContainer;
                     // Loop up the tree to find the equation.
                     while ( mathjaxParent.className != "mathjax") {
