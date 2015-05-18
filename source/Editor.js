@@ -1931,9 +1931,21 @@ var keyHandlers = {
                     while ( mathjaxParent.className != "mathjax") {
                          mathjaxParent = mathjaxParent.parentNode;
                     }
+                    // Get the div containing the equation.
+                    var parent = mathjaxParent.parentNode;
+                    var nodesInParent = parent.childNodes;
+                    var secondLastNode = nodesInParent.childNodes[nodesInParent.length - 2];
 
-                    var spanRange = new Range();
-                    spanRange.setEndAfter(mathjaxParent);
+                    // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
+                    // If the equation is at the end of the node, set the caret before the equation, 
+                    // otherwise set it at the end of the node, (the element before the <br> tag).
+                    if (secondLastNode && (secondLastNode === mathjaxParent)){
+                        var spanRange = new Range();
+                        spanRange.setEndAfter(mathjaxParent);
+                    } else {
+                        var spanRange = new Range();
+                        spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
+                    }
 
                     self.setSelection(spanRange);
                 } else {
