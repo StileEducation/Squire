@@ -1891,10 +1891,41 @@ var keyHandlers = {
 
         var checkInSVG = /svg|use|g|SCRIPT/i;
         // If not collapsed, delete contents
-        if ( !range.collapsed ) {
+
+        // Check if there is only a Mathjax Equation in the iFrame.
+        var ancestor = range.commonAncestorContainer;
+        var node = ancestor;
+        
+        // Store text nodes in textNodes array.
+        var textNodes = [];
+
+        // Filter childnodes, that are textNodes.
+        for (node=node.firstChild;node;node=node.nextSibling){
+            if (node.nodeType == 3) textNodes.push(node);
+        }
+        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length == 3 || ancestor.childNodes.length == 4));
+
+        if (!isOnlyMathjax && !range.collapsed ) {
             event.preventDefault();
             deleteContentsOfRange( range );
             afterDelete( self, range );
+        }
+
+        if (isOnlyMathjax) {
+            event.preventDefault();
+            // Remove each child of the range.
+            // clone the childNodes, because the reference will remove the references as they are removed from the element.
+            var childNodes = ancestor.childNodes;
+            // Doing this by getting the length of childNodes, then using a for loop won't work because the length will change as childNodes, is a relative reference.
+            // Using cloneNode means that the childNodes are not elements of the original node.
+            while (childNodes.length != 1) {
+                ancestor.removeChild(childNodes[0]);
+            }            
+            ancestor.innerHTML = " <br>";
+            var ancestorRange = document.createRange();
+            ancestorRange.setStartAfter(ancestor);
+            ancestorRange.setEndBefore(ancestor);
+            self.setSelection(ancestorRange);
         }
         // If at beginning of block, merge with previous
         else if ( rangeDoesStartAtBlockBoundary( range ) ) {
