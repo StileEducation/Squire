@@ -1869,18 +1869,6 @@ var keyHandlers = {
         range = self._createRange( nodeAfterSplit, 0 );
         self.setSelection( range );
         self._updatePath( range, true );
-
-        // Scroll into view
-        if ( nodeAfterSplit.nodeType === TEXT_NODE ) {
-            nodeAfterSplit = nodeAfterSplit.parentNode;
-        }
-        var doc = self._doc,
-            body = self._body;
-        if ( nodeAfterSplit.offsetTop + nodeAfterSplit.offsetHeight >
-                ( doc.documentElement.scrollTop || body.scrollTop ) +
-                body.offsetHeight ) {
-            nodeAfterSplit.scrollIntoView( false );
-        }
     },
     backspace: function ( self, event, range ) {
         self._removeZWS();
@@ -1890,10 +1878,41 @@ var keyHandlers = {
 
         var checkInSVG = /svg|use|g|SCRIPT/i;
         // If not collapsed, delete contents
-        if ( !range.collapsed ) {
+
+        // Check if there is only a Mathjax Equation in the iFrame.
+        var ancestor = range.commonAncestorContainer;
+        var node = ancestor;
+        
+        // Store text nodes in textNodes array.
+        var textNodes = [];
+
+        // Filter childnodes, that are textNodes.
+        for (node=node.firstChild;node;node=node.nextSibling){
+            if (node.nodeType == 3) textNodes.push(node);
+        }
+        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length == 3 || ancestor.childNodes.length == 4));
+
+        if (!isOnlyMathjax && !range.collapsed ) {
             event.preventDefault();
             deleteContentsOfRange( range );
             afterDelete( self, range );
+        }
+
+        if (isOnlyMathjax) {
+            event.preventDefault();
+            // Remove each child of the range.
+            // clone the childNodes, because the reference will remove the references as they are removed from the element.
+            var childNodes = ancestor.childNodes;
+            // Doing this by getting the length of childNodes, then using a for loop won't work because the length will change as childNodes, is a relative reference.
+            // Using cloneNode means that the childNodes are not elements of the original node.
+            while (childNodes.length != 1) {
+                ancestor.removeChild(childNodes[0]);
+            }            
+            ancestor.innerHTML = " <br>";
+            var ancestorRange = document.createRange();
+            ancestorRange.setStartAfter(ancestor);
+            ancestorRange.setEndBefore(ancestor);
+            self.setSelection(ancestorRange);
         }
         // If at beginning of block, merge with previous
         else if ( rangeDoesStartAtBlockBoundary( range ) ) {
@@ -1931,9 +1950,21 @@ var keyHandlers = {
                     while ( mathjaxParent.className != "mathjax") {
                          mathjaxParent = mathjaxParent.parentNode;
                     }
+                    // Get the div containing the equation.
+                    var parent = mathjaxParent.parentNode;
+                    var nodesInParent = parent.childNodes;
+                    var secondLastNode = nodesInParent.childNodes[nodesInParent.length - 2];
 
-                    var spanRange = new Range();
-                    spanRange.setEndAfter(mathjaxParent);
+                    // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
+                    // If the equation is at the end of the node, set the caret before the equation, 
+                    // otherwise set it at the end of the node, (the element before the <br> tag).
+                    if (secondLastNode && (secondLastNode === mathjaxParent)){
+                        var spanRange = document.createRange();
+                        spanRange.setEndAfter(mathjaxParent);
+                    } else {
+                        var spanRange = document.createRange();
+                        spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
+                    }
 
                     self.setSelection(spanRange);
                 } else {
