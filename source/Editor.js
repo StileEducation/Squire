@@ -1870,7 +1870,7 @@ var keyHandlers = {
         self.setSelection( range );
         self._updatePath( range, true );
 
-        // Scroll into view
+        /* Scroll into view
         if ( nodeAfterSplit.nodeType === TEXT_NODE ) {
             nodeAfterSplit = nodeAfterSplit.parentNode;
         }
@@ -1881,6 +1881,7 @@ var keyHandlers = {
                 body.offsetHeight ) {
             nodeAfterSplit.scrollIntoView( false );
         }
+        */
     },
     backspace: function ( self, event, range ) {
         self._removeZWS();
