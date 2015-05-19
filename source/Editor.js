@@ -1941,10 +1941,10 @@ var keyHandlers = {
                     // If the equation is at the end of the node, set the caret before the equation, 
                     // otherwise set it at the end of the node, (the element before the <br> tag).
                     if (secondLastNode && (secondLastNode === mathjaxParent)){
-                        var spanRange = new Range();
+                        var spanRange = document.createRange();
                         spanRange.setEndAfter(mathjaxParent);
                     } else {
-                        var spanRange = new Range();
+                        var spanRange = document.createRange();
                         spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
                     }
 
