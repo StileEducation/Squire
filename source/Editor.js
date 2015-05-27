@@ -1878,7 +1878,6 @@ var keyHandlers = {
 
         var checkInSVG = /svg|use|g|SCRIPT/i;
         // If not collapsed, delete contents
-
         // Check if there is only a Mathjax Equation in the iFrame.
         var ancestor = range.commonAncestorContainer;
         var node = ancestor;
@@ -1953,7 +1952,7 @@ var keyHandlers = {
                     // Get the div containing the equation.
                     var parent = mathjaxParent.parentNode;
                     var nodesInParent = parent.childNodes;
-                    var secondLastNode = nodesInParent.childNodes[nodesInParent.length - 2];
+                    var secondLastNode = nodesInParent[nodesInParent.length - 2];
 
                     // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
                     // If the equation is at the end of the node, set the caret before the equation, 
