@@ -2118,8 +2118,8 @@ keyHandlers[ ctrlKey + 'shift-8' ] = mapKeyTo( 'makeUnorderedList' );
 keyHandlers[ ctrlKey + 'shift-9' ] = mapKeyTo( 'makeOrderedList' );
 keyHandlers[ ctrlKey + '[' ] = mapKeyTo( 'decreaseQuoteLevel' );
 keyHandlers[ ctrlKey + ']' ] = mapKeyTo( 'increaseQuoteLevel' );
-keyHandlers[ ctrlKey + 'y' ] = mapKeyTo( 'redo' );
-keyHandlers[ ctrlKey + 'z' ] = mapKeyTo( 'undo' );
+// keyHandlers[ ctrlKey + 'y' ] = mapKeyTo( 'redo' );
+// keyHandlers[ ctrlKey + 'z' ] = mapKeyTo( 'undo' );
 keyHandlers[ ctrlKey + 'shift-z' ] = mapKeyTo( 'redo' );
 
 // Ref: http://unixpapa.com/js/key.html
