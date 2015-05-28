@@ -1887,7 +1887,7 @@ var keyHandlers = {
 
         // Filter childnodes, that are textNodes.
         for (node=node.firstChild;node;node=node.nextSibling){
-            if (node.nodeType === 3) textNodes.push(node);
+            if (node.nodeType === 3 && node.textContet && node.textContent === " ") textNodes.push(node);
         }
         var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length === 3 || ancestor.childNodes.length === 4));
 
