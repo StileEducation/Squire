@@ -2144,7 +2144,7 @@ var keyHandlers = {
             event.preventDefault();
 
             // create a new range
-            var rightRange = document.createRange();
+            var rightRange = self._doc.createRange();
             rightRange.setStartAfter(anchorNextNode);
             rightRange.setEndAfter(anchorNextNode);
             
