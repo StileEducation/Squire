@@ -1988,9 +1988,13 @@ var keyHandlers = {
             }
         }
         else {
-            if (checkInSVG.test(range.commonAncestorContainer.parentElement)){
-                event.preventDefault();
-                detach(range.commonAncestorContainer.parentElement);
+            // If the commonAncestor was in a mathjax equation, delete the parent. Namely the mathjax equation.
+            if (range.commonAncestorContainer && 
+                range.commonAncestorContainer.parentElement && 
+                checkInSVG.test(range.commonAncestorContainer.nodeName)
+            ) {
+                    event.preventDefault();
+                    detach(range.commonAncestorContainer.parentElement);
             }
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
