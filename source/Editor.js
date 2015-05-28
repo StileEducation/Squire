@@ -1891,12 +1891,14 @@ var keyHandlers = {
         }
         var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length === 3 || ancestor.childNodes.length === 4));
 
+        // There is only a colasped range, delre the contents of the range.
         if (!isOnlyMathjax && !range.collapsed ) {
             event.preventDefault();
             deleteContentsOfRange( range );
             afterDelete( self, range );
         }
 
+        // If there is only a mathjax equation, remove the childnodes of the range, to keep the dom from being empty.
         if (isOnlyMathjax) {
             event.preventDefault();
             // Remove each child of the range.
