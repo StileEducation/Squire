@@ -2103,13 +2103,13 @@ var keyHandlers = {
 
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
-        var caretAtEndOfNode = selection.anchorOffset === 0;
+        var caretAtStartOfNode = selection.anchorOffset === 0;
 
         // Test is SPAN and has mathjax class.
         var isMathjaxIE = !!(validNodes && anchorPreviousNode.matchesSelector && anchorPreviousNode.matchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
 
-        if (caretAtEndOfNode && (isMathjax || isMathjaxIE)) {
+        if (caretAtStartOfNode && (isMathjax || isMathjaxIE)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
@@ -2139,7 +2139,7 @@ var keyHandlers = {
         var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
 
 
-        if (caretAtEndOfNode && (isMathjax || isMathjaxIE)) {
+        if (isMathjax || isMathjaxIE) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
