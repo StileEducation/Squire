@@ -2084,10 +2084,63 @@ var keyHandlers = {
 
         self.setSelection( range );
     },
-    left: function ( self ) {
+    left: function ( self, event, range) {
+        var selection = self._doc.getSelection();
+
+        // We're not interested in things that are not Carets.
+        if (!selection.isCollapsed) { return; }
+        // or anything that doesn't have an anchorNode.
+        if(!selection.anchorNode) { return; }
+
+        var anchorNode = selection.anchorNode;
+        var anchorPreviousNode = anchorNode.previousSibling;
+
+        if (selection.anchorOffset === 0 &&
+            anchorNode &&
+            anchorPreviousNode && 
+            /SPAN/i.test(anchorPreviousNode.nodeName) && 
+            anchorPreviousNode.classList.contains("mathjax")
+        ) {
+            // this is a mathjax equation, prevent defualt.
+            event.preventDefault();
+
+            // create a new range
+            var leftRange = document.createRange();
+            leftRange.setStartBefore(anchorPreviousNode);
+            leftRange.setEndBefore(anchorPreviousNode);
+            
+            // set a selection.
+            self.setSelection(leftRange);
+        }
+
         self._removeZWS();
     },
-    right: function ( self ) {
+    right: function ( self, event, range) {
+        var selection = self._doc.getSelection();
+
+        // We're not interested in things that are not Carets.
+        if (!selection.isCollapsed) { return; }
+
+        var anchorNode = selection.anchorNode;
+        var anchorNextNode = anchorNode.nextSibling;
+
+        if (
+            anchorNextNode && 
+            /SPAN/i.test(anchorNextNode.nodeName) && 
+            anchorNextNode.classList.contains("mathjax")
+        ) {
+            // this is a mathjax equation, prevent defualt.
+            event.preventDefault();
+
+            // create a new range
+            var rightRange = document.createRange();
+            rightRange.setStartAfter(anchorNextNode);
+            rightRange.setEndAfter(anchorNextNode);
+            
+            // set a selection.
+            self.setSelection(rightRange);
+        }
+
         self._removeZWS();
     }
 };
