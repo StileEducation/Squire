@@ -2101,12 +2101,15 @@ var keyHandlers = {
         var anchorNode = selection.anchorNode;
         var anchorPreviousNode = anchorNode.previousSibling;
 
-        if (selection.anchorOffset === 0 &&
-            anchorNode &&
-            anchorPreviousNode && 
-            /SPAN/i.test(anchorPreviousNode.nodeName) && 
-            anchorPreviousNode.classList.contains("mathjax")
-        ) {
+        // Test conditions for selection being at the start of the textnode.
+        var validNodes = !!(anchorNode && anchorPreviousNode);
+        var caretAtEndOfNode = selection.anchorOffset === 0;
+
+        // Test is SPAN and has mathjax class.
+        var isMathjaxIE = !!(validNodes && anchorPreviousNode.matchesSelector && anchorPreviousNode.matchesSelector('span.mathjax'));
+        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+
+        if (caretAtEndOfNode && (isMathjax || isMathjaxIE)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
@@ -2130,11 +2133,13 @@ var keyHandlers = {
         var anchorNode = selection.anchorNode;
         var anchorNextNode = anchorNode.nextSibling;
 
-        if (
-            anchorNextNode && 
-            /SPAN/i.test(anchorNextNode.nodeName) && 
-            anchorNextNode.classList.contains("mathjax")
-        ) {
+        var validNodes = !!(anchorNode && anchorNextNode);
+        // Test is SPAN and has mathjax class.
+        var isMathjaxIE = !!(validNodes && anchorNextNode.matchesSelector && anchorNextNode.matchesSelector('span.mathjax'));
+        var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
+
+
+        if (caretAtEndOfNode && (isMathjax || isMathjaxIE)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
