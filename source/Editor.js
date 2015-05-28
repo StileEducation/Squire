@@ -1910,7 +1910,7 @@ var keyHandlers = {
                 ancestor.removeChild(childNodes[0]);
             }            
             ancestor.innerHTML = " <br>";
-            var ancestorRange = document.createRange();
+            var ancestorRange = self._doc.createRange();
             ancestorRange.setStartAfter(ancestor);
             ancestorRange.setEndBefore(ancestor);
             self.setSelection(ancestorRange);
@@ -1959,9 +1959,9 @@ var keyHandlers = {
                     // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
                     // If the equation is at the end of the node, set the caret before the equation, 
                     // otherwise set it at the end of the node, (the element before the <br> tag).
-                    var spanRange = document.createRange();
+                    var spanRange = self._doc.createRange();
 
-                    if (secondLastNode && (secondLastNode === mathjaxParent)){                        
+                    if (secondLastNode && (secondLastNode === mathjaxParent)){
                         spanRange.setEndAfter(mathjaxParent);
                     } else {
                         spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
@@ -2111,7 +2111,7 @@ var keyHandlers = {
             event.preventDefault();
 
             // create a new range
-            var leftRange = document.createRange();
+            var leftRange = self._doc.createRange();
             leftRange.setStartBefore(anchorPreviousNode);
             leftRange.setEndBefore(anchorPreviousNode);
             
