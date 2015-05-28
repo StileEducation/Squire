@@ -1887,9 +1887,9 @@ var keyHandlers = {
 
         // Filter childnodes, that are textNodes.
         for (node=node.firstChild;node;node=node.nextSibling){
-            if (node.nodeType == 3) textNodes.push(node);
+            if (node.nodeType === 3) textNodes.push(node);
         }
-        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length == 3 || ancestor.childNodes.length == 4));
+        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length === 3 || ancestor.childNodes.length === 4));
 
         if (!isOnlyMathjax && !range.collapsed ) {
             event.preventDefault();
@@ -1957,11 +1957,11 @@ var keyHandlers = {
                     // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
                     // If the equation is at the end of the node, set the caret before the equation, 
                     // otherwise set it at the end of the node, (the element before the <br> tag).
-                    if (secondLastNode && (secondLastNode === mathjaxParent)){
-                        var spanRange = document.createRange();
+                    var spanRange = document.createRange();
+
+                    if (secondLastNode && (secondLastNode === mathjaxParent)){                        
                         spanRange.setEndAfter(mathjaxParent);
                     } else {
-                        var spanRange = document.createRange();
                         spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
                     }
 
