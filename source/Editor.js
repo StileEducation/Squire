@@ -1878,7 +1878,6 @@ var keyHandlers = {
 
         var checkInSVG = /svg|use|g|SCRIPT/i;
         // If not collapsed, delete contents
-
         // Check if there is only a Mathjax Equation in the iFrame.
         var ancestor = range.commonAncestorContainer;
         var node = ancestor;
@@ -1888,16 +1887,18 @@ var keyHandlers = {
 
         // Filter childnodes, that are textNodes.
         for (node=node.firstChild;node;node=node.nextSibling){
-            if (node.nodeType == 3) textNodes.push(node);
+            if (node.nodeType === TEXT_NODE && node.textContent && node.textContent === " ") textNodes.push(node);
         }
-        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length == 3 || ancestor.childNodes.length == 4));
+        var isOnlyMathjax = ((textNodes.length === 1 || textNodes.length === 2) && range.commonAncestorContainer.querySelectorAll('.mathjax').length === 1 && (ancestor.childNodes.length === 3 || ancestor.childNodes.length === 4));
 
+        // There is only a colasped range, delre the contents of the range.
         if (!isOnlyMathjax && !range.collapsed ) {
             event.preventDefault();
             deleteContentsOfRange( range );
             afterDelete( self, range );
         }
 
+        // If there is only a mathjax equation, remove the childnodes of the range, to keep the dom from being empty.
         if (isOnlyMathjax) {
             event.preventDefault();
             // Remove each child of the range.
@@ -1909,7 +1910,7 @@ var keyHandlers = {
                 ancestor.removeChild(childNodes[0]);
             }            
             ancestor.innerHTML = " <br>";
-            var ancestorRange = document.createRange();
+            var ancestorRange = self._doc.createRange();
             ancestorRange.setStartAfter(ancestor);
             ancestorRange.setEndBefore(ancestor);
             self.setSelection(ancestorRange);
@@ -1953,16 +1954,16 @@ var keyHandlers = {
                     // Get the div containing the equation.
                     var parent = mathjaxParent.parentNode;
                     var nodesInParent = parent.childNodes;
-                    var secondLastNode = nodesInParent.childNodes[nodesInParent.length - 2];
+                    var secondLastNode = nodesInParent[nodesInParent.length - 2];
 
                     // Check if the equation is at the end of the node, the second last element. <br> is always the last element.
                     // If the equation is at the end of the node, set the caret before the equation, 
                     // otherwise set it at the end of the node, (the element before the <br> tag).
+                    var spanRange = self._doc.createRange();
+
                     if (secondLastNode && (secondLastNode === mathjaxParent)){
-                        var spanRange = document.createRange();
                         spanRange.setEndAfter(mathjaxParent);
                     } else {
-                        var spanRange = document.createRange();
                         spanRange.setStartBefore(nodesInParent[nodesInParent.length - 1]);
                     }
 
@@ -1989,9 +1990,13 @@ var keyHandlers = {
             }
         }
         else {
-            if (checkInSVG.test(range.commonAncestorContainer.parentElement)){
-                event.preventDefault();
-                detach(range.commonAncestorContainer.parentElement);
+            // If the commonAncestor was in a mathjax equation, delete the parent. Namely the mathjax equation.
+            if (range.commonAncestorContainer && 
+                range.commonAncestorContainer.parentElement && 
+                checkInSVG.test(range.commonAncestorContainer.nodeName)
+            ) {
+                    event.preventDefault();
+                    detach(range.commonAncestorContainer.parentElement);
             }
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
@@ -2085,10 +2090,68 @@ var keyHandlers = {
 
         self.setSelection( range );
     },
-    left: function ( self ) {
+    left: function ( self, event, range) {
+        var selection = self._doc.getSelection();
+
+        // We're not interested in things that are not Carets.
+        if (!selection.isCollapsed) { return; }
+        // or anything that doesn't have an anchorNode.
+        if(!selection.anchorNode) { return; }
+
+        var anchorNode = selection.anchorNode;
+        var anchorPreviousNode = anchorNode.previousSibling;
+
+        // Test conditions for selection being at the start of the textnode.
+        var validNodes = !!(anchorNode && anchorPreviousNode);
+        var caretAtStartOfNode = selection.anchorOffset === 0;
+
+        // Test is SPAN and has mathjax class.
+        var isMathjaxIE = !!(validNodes && anchorPreviousNode.matchesSelector && anchorPreviousNode.matchesSelector('span.mathjax'));
+        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+
+        if (caretAtStartOfNode && (isMathjax || isMathjaxIE)) {
+            // this is a mathjax equation, prevent defualt.
+            event.preventDefault();
+
+            // create a new range
+            var leftRange = self._doc.createRange();
+            leftRange.setStartBefore(anchorPreviousNode);
+            leftRange.setEndBefore(anchorPreviousNode);
+            
+            // set a selection.
+            self.setSelection(leftRange);
+        }
+
         self._removeZWS();
     },
-    right: function ( self ) {
+    right: function ( self, event, range) {
+        var selection = self._doc.getSelection();
+
+        // We're not interested in things that are not Carets.
+        if (!selection.isCollapsed) { return; }
+
+        var anchorNode = selection.anchorNode;
+        var anchorNextNode = anchorNode.nextSibling;
+
+        var validNodes = !!(anchorNode && anchorNextNode);
+        // Test is SPAN and has mathjax class.
+        var isMathjaxIE = !!(validNodes && anchorNextNode.matchesSelector && anchorNextNode.matchesSelector('span.mathjax'));
+        var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
+
+
+        if (isMathjax || isMathjaxIE) {
+            // this is a mathjax equation, prevent defualt.
+            event.preventDefault();
+
+            // create a new range
+            var rightRange = self._doc.createRange();
+            rightRange.setStartAfter(anchorNextNode);
+            rightRange.setEndAfter(anchorNextNode);
+            
+            // set a selection.
+            self.setSelection(rightRange);
+        }
+
         self._removeZWS();
     }
 };
@@ -2118,8 +2181,8 @@ keyHandlers[ ctrlKey + 'shift-8' ] = mapKeyTo( 'makeUnorderedList' );
 keyHandlers[ ctrlKey + 'shift-9' ] = mapKeyTo( 'makeOrderedList' );
 keyHandlers[ ctrlKey + '[' ] = mapKeyTo( 'decreaseQuoteLevel' );
 keyHandlers[ ctrlKey + ']' ] = mapKeyTo( 'increaseQuoteLevel' );
-keyHandlers[ ctrlKey + 'y' ] = mapKeyTo( 'redo' );
-keyHandlers[ ctrlKey + 'z' ] = mapKeyTo( 'undo' );
+// keyHandlers[ ctrlKey + 'y' ] = mapKeyTo( 'redo' );
+// keyHandlers[ ctrlKey + 'z' ] = mapKeyTo( 'undo' );
 keyHandlers[ ctrlKey + 'shift-z' ] = mapKeyTo( 'redo' );
 
 // Ref: http://unixpapa.com/js/key.html
