@@ -2106,7 +2106,7 @@ var keyHandlers = {
         var caretAtStartOfNode = selection.anchorOffset === 0;
 
         // Test is SPAN and has mathjax class.
-        var isMathjaxIE = !!(validNodes && anchorPreviousNode.matchesSelector && anchorPreviousNode.matchesSelector('span.mathjax'));
+        var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
 
         if (caretAtStartOfNode && (isMathjax || isMathjaxIE)) {
@@ -2135,7 +2135,7 @@ var keyHandlers = {
 
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
-        var isMathjaxIE = !!(validNodes && anchorNextNode.matchesSelector && anchorNextNode.matchesSelector('span.mathjax'));
+        var isMathjaxIE = !!(validNodes && anchorNextNode.msMatchesSelector && anchorNextNode.msMatchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
 
 
