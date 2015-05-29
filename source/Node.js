@@ -93,7 +93,7 @@ function getPath ( node ) {
         }
 
 
-        if (node.className && (className = node.className.trim()) ) {
+        if (node.className && node.classList.trim && (className = node.className.trim()) ) {
             classNames = className.split( /\s\s*/ );
             classNames.sort();
             path += '.';
