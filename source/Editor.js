@@ -2106,10 +2106,11 @@ var keyHandlers = {
         var caretAtStartOfNode = selection.anchorOffset === 0;
 
         // Test is SPAN and has mathjax class.
+        var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
         var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
 
-        if (caretAtStartOfNode && (isMathjax || isMathjaxIE)) {
+        if (caretAtStartOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
@@ -2136,10 +2137,11 @@ var keyHandlers = {
         var caretIsAtEndOfNode = selection.anchorOffset === selection.anchorNode.wholeText.length;
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
+        var isMathjaxIOS = !!(validNodes && anchorNextNode.webkitMatchesSelector && anchorNextNode.webkitMatchesSelector('span.mathjax'));
         var isMathjaxIE = !!(validNodes && anchorNextNode.msMatchesSelector && anchorNextNode.msMatchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
 
-        if (caretIsAtEndOfNode && (isMathjax || isMathjaxIE)) {
+        if (caretIsAtEndOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
