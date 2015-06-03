@@ -2142,26 +2142,33 @@ var keyHandlers = {
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
         var caretAtStartOfNode = selection.anchorOffset === 0;
-
+        var isMathjaxIOS, isMathjaxIE, isMathjax;
         // Test is SPAN and has mathjax class.
-        var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
-        var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
-        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+        isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
+        isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
+        isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+
+        // create a range to set the selection to.
+        var leftRange = self._doc.createRange();
 
         if (caretAtStartOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
             // create a new range
-            var leftRange = self._doc.createRange();
             leftRange.setStartBefore(anchorPreviousNode);
             leftRange.setEndBefore(anchorPreviousNode);
-            
+
+            if (isGecko && anchorPreviousNode.previousSibling && anchorPreviousNode.previousSibling.textContent) {
+                var beforePreviousNode = anchorPreviousNode.previousSibling;
+                leftRange.setStart(beforePreviousNode, beforePreviousNode.textContent.length);
+                leftRange.setEnd(beforePreviousNode, beforePreviousNode.textContent.length);
+            }
+
             // set a selection.
             self.setSelection(leftRange);
+            return;
         }
-
-        self._removeZWS();
     },
     right: function ( self, event, range) {
         var selection = self._doc.getSelection();
