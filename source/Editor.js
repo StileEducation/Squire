@@ -2004,6 +2004,38 @@ var keyHandlers = {
                     event.preventDefault();
                     detach(mathjaxParent);
             }
+
+            var selection = self._doc.getSelection();
+            var anchorNode = selection.anchorNode;
+            var anchorOffset = selection.anchorOffset;
+            var previousSibling = anchorNode.previousSibling;
+
+            // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
+
+            if (anchorNode.textContent && anchorNode.textContent.length) {
+                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1);
+            } else {
+                var caretAtStartOfNode = !!(anchorOffset === 0);
+            }
+            
+
+            if (anchorNode && previousSibling && caretAtStartOfNode) {
+                // Is an empty text node, backspace has been pressed
+                // and it's previous sibling is a mathjax equation
+                // then remove both elements.
+                var isMathjaxIOS = !!(previousSibling.webkitMatchesSelector && previousSibling.webkitMatchesSelector('span.mathjax'));
+                var isMathjaxIE = !!(previousSibling.msMatchesSelector && previousSibling.msMatchesSelector('span.mathjax'));
+                var isMathjax  = !!(previousSibling.matches && previousSibling.matches('span.mathjax'));
+                
+                if (isMathjaxIOS || isMathjaxIE || isMathjax) {
+                    event.preventDefault();
+                    detach(previousSibling);
+                }
+            }
+
+
+            //If we're trying to delete a mathjax equation, but the browser is giving us it's parent div, and telling us the caret was at a mathjax element.
+
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
         }
