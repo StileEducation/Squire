@@ -2178,8 +2178,10 @@ var keyHandlers = {
 
         var anchorNode = selection.anchorNode;
         var anchorNextNode = anchorNode.nextSibling;
+        
+        if (!anchorNode.textContent) return;
 
-        var caretIsAtEndOfNode = selection.anchorOffset === selection.anchorNode.wholeText.length;
+        var caretIsAtEndOfNode = selection.anchorOffset === anchorNode.textContent.length;
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
         var isMathjaxIOS = !!(validNodes && anchorNextNode.webkitMatchesSelector && anchorNextNode.webkitMatchesSelector('span.mathjax'));
