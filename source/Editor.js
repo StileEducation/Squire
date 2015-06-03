@@ -1993,10 +1993,16 @@ var keyHandlers = {
             // If the commonAncestor was in a mathjax equation, delete the parent. Namely the mathjax equation.
             if (range.commonAncestorContainer && 
                 range.commonAncestorContainer.parentElement && 
-                checkInSVG.test(range.commonAncestorContainer.nodeName)
+                (checkInSVG.test(range.commonAncestorContainer.nodeName) || checkInSVG.test(range.commonAncestorContainer.parentElement.nodeName))
             ) {
+                    // This is an element inside an SVG. We look up the DOM tree for the mathjax element.
+                    var mathjaxParent = range.commonAncestorContainer;
+                    // Loop up the tree to find the equation.
+                    while ( mathjaxParent.className != "mathjax") {
+                         mathjaxParent = mathjaxParent.parentNode;
+                    }
                     event.preventDefault();
-                    detach(range.commonAncestorContainer.parentElement);
+                    detach(mathjaxParent);
             }
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
