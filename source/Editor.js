@@ -1990,27 +1990,22 @@ var keyHandlers = {
             }
         }
         else {
-            // If the commonAncestor was in a mathjax equation, delete the parent. Namely the mathjax equation.
-            if (range.commonAncestorContainer && 
-                range.commonAncestorContainer.parentElement && 
-                (checkInSVG.test(range.commonAncestorContainer.nodeName) || checkInSVG.test(range.commonAncestorContainer.parentElement.nodeName))
-            ) {
-                    // This is an element inside an SVG. We look up the DOM tree for the mathjax element.
-                    var mathjaxParent = range.commonAncestorContainer;
-                    // Loop up the tree to find the equation.
-                    while ( mathjaxParent.className != "mathjax") {
-                         mathjaxParent = mathjaxParent.parentNode;
+            // Traverse the DOM and search for a Mathjax equation that contains the range.commonAncestorContainer. If such equation exsits, delete it.
+            var currentSearchNode = range.commonAncestorContainer;
+            var mathjaxSpan = null;
 
-                         // We've reached the body of the iFrame, abort.
-                         if (mathjaxParent === self._doc.body) break;
-                    }
+            while ( currentSearchNode !== self._doc.body) {
+                if (currentSearchNode.nodeType === ELEMENT_NODE && currentSearchNode.classList.contains('mathjax')) {
+                    mathjaxSpan = currentSearchNode;
+                    break;
+                }
+                
+                currentSearchNode = currentSearchNode.parentNode;
+            }
 
-                    // Don't detach the entire body.
-                    if (!(mathjaxParent === self._doc.body)) {
-                        event.preventDefault();
-                        detach(mathjaxParent);
-                    }
-                    
+            if (mathjaxSpan) {
+                event.preventDefault();
+                detach(mathjaxSpan);
             }
 
             var selection = self._doc.getSelection();
