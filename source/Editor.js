@@ -1991,17 +1991,14 @@ var keyHandlers = {
         }
         else {
             // Traverse the DOM and search for a Mathjax equation that contains the range.commonAncestorContainer. If such equation exsits, delete it.
-            var currentSearchNode = range.commonAncestorContainer;
             var mathjaxSpan = null;
+            var mathjaxes = self._doc.body.querySelectorAll('span.mathjax');
 
-            while ( currentSearchNode !== self._doc.body) {
-                if (currentSearchNode.nodeType === ELEMENT_NODE && currentSearchNode.classList.contains('mathjax')) {
-                    mathjaxSpan = currentSearchNode;
-                    break;
+            [].forEach.call(mathjaxes, function(mathjaxEl) {
+                if(mathjaxEl.contains(range.commonAncestorContainer)) {
+                    mathjaxSpan = mathjaxEl;
                 }
-                
-                currentSearchNode = currentSearchNode.parentNode;
-            }
+            });
 
             if (mathjaxSpan) {
                 event.preventDefault();
