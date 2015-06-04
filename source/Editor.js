@@ -2159,7 +2159,7 @@ var keyHandlers = {
             leftRange.setStartBefore(anchorPreviousNode);
             leftRange.setEndBefore(anchorPreviousNode);
 
-            if (isGecko && anchorPreviousNode.previousSibling && anchorPreviousNode.previousSibling.textContent) {
+            if (isGecko && anchorPreviousNode.previousSibling && anchorPreviousNode.previousSibling.nodeType === TEXT_NODE) {
                 var beforePreviousNode = anchorPreviousNode.previousSibling;
                 leftRange.setStart(beforePreviousNode, beforePreviousNode.textContent.length);
                 leftRange.setEnd(beforePreviousNode, beforePreviousNode.textContent.length);
