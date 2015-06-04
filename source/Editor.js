@@ -2142,11 +2142,11 @@ var keyHandlers = {
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
         var caretAtStartOfNode = selection.anchorOffset === 0;
-        var isMathjaxIOS, isMathjaxIE, isMathjax;
+        
         // Test is SPAN and has mathjax class.
-        isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
-        isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
-        isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+        var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
+        var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
+        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
 
         // create a range to set the selection to.
         var leftRange = self._doc.createRange();
@@ -2167,7 +2167,6 @@ var keyHandlers = {
 
             // set a selection.
             self.setSelection(leftRange);
-            return;
         }
     },
     right: function ( self, event, range) {
