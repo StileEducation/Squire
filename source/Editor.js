@@ -1990,14 +1990,55 @@ var keyHandlers = {
             }
         }
         else {
-            // If the commonAncestor was in a mathjax equation, delete the parent. Namely the mathjax equation.
-            if (range.commonAncestorContainer && 
-                range.commonAncestorContainer.parentElement && 
-                checkInSVG.test(range.commonAncestorContainer.nodeName)
-            ) {
-                    event.preventDefault();
-                    detach(range.commonAncestorContainer.parentElement);
+            // Traverse the DOM and search for a Mathjax equation that contains the range.commonAncestorContainer. If such equation exsits, delete it.
+            var currentSearchNode = range.commonAncestorContainer;
+            var mathjaxSpan = null;
+
+            while ( currentSearchNode !== self._doc.body) {
+                if (currentSearchNode.nodeType === ELEMENT_NODE && currentSearchNode.classList.contains('mathjax')) {
+                    mathjaxSpan = currentSearchNode;
+                    break;
+                }
+                
+                currentSearchNode = currentSearchNode.parentNode;
             }
+
+            if (mathjaxSpan) {
+                event.preventDefault();
+                detach(mathjaxSpan);
+            }
+
+            var selection = self._doc.getSelection();
+            var anchorNode = selection.anchorNode;
+            var anchorOffset = selection.anchorOffset;
+            var previousSibling = anchorNode.previousSibling;
+
+            // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
+
+            if (anchorNode.textContent && anchorNode.textContent.length) {
+                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1);
+            } else {
+                var caretAtStartOfNode = !!(anchorOffset === 0);
+            }
+            
+
+            if (anchorNode && previousSibling && caretAtStartOfNode) {
+                // Is an empty text node, backspace has been pressed
+                // and it's previous sibling is a mathjax equation
+                // then remove both elements.
+                var isMathjaxIOS = !!(previousSibling.webkitMatchesSelector && previousSibling.webkitMatchesSelector('span.mathjax'));
+                var isMathjaxIE = !!(previousSibling.msMatchesSelector && previousSibling.msMatchesSelector('span.mathjax'));
+                var isMathjax  = !!(previousSibling.matches && previousSibling.matches('span.mathjax'));
+                
+                if (isMathjaxIOS || isMathjaxIE || isMathjax) {
+                    event.preventDefault();
+                    detach(previousSibling);
+                }
+            }
+
+
+            //If we're trying to delete a mathjax equation, but the browser is giving us it's parent div, and telling us the caret was at a mathjax element.
+
             self.setSelection( range );
             setTimeout( function () { afterDelete( self ); }, 0 );
         }
@@ -2104,26 +2145,32 @@ var keyHandlers = {
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
         var caretAtStartOfNode = selection.anchorOffset === 0;
-
+        
         // Test is SPAN and has mathjax class.
         var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
         var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
         var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+
+        // create a range to set the selection to.
+        var leftRange = self._doc.createRange();
 
         if (caretAtStartOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
             // create a new range
-            var leftRange = self._doc.createRange();
             leftRange.setStartBefore(anchorPreviousNode);
             leftRange.setEndBefore(anchorPreviousNode);
-            
+
+            if (isGecko && anchorPreviousNode.previousSibling && anchorPreviousNode.previousSibling.nodeType === TEXT_NODE) {
+                var beforePreviousNode = anchorPreviousNode.previousSibling;
+                leftRange.setStart(beforePreviousNode, beforePreviousNode.textContent.length);
+                leftRange.setEnd(beforePreviousNode, beforePreviousNode.textContent.length);
+            }
+
             // set a selection.
             self.setSelection(leftRange);
         }
-
-        self._removeZWS();
     },
     right: function ( self, event, range) {
         var selection = self._doc.getSelection();
@@ -2133,8 +2180,10 @@ var keyHandlers = {
 
         var anchorNode = selection.anchorNode;
         var anchorNextNode = anchorNode.nextSibling;
+        
+        if (!anchorNode.textContent) return;
 
-        var caretIsAtEndOfNode = selection.anchorOffset === selection.anchorNode.wholeText.length;
+        var caretIsAtEndOfNode = selection.anchorOffset === anchorNode.textContent.length;
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
         var isMathjaxIOS = !!(validNodes && anchorNextNode.webkitMatchesSelector && anchorNextNode.webkitMatchesSelector('span.mathjax'));
