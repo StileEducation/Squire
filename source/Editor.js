@@ -2000,9 +2000,17 @@ var keyHandlers = {
                     // Loop up the tree to find the equation.
                     while ( mathjaxParent.className != "mathjax") {
                          mathjaxParent = mathjaxParent.parentNode;
+
+                         // We've reached the body of the iFrame, abort.
+                         if (mathjaxParent === self._doc.body) break;
                     }
-                    event.preventDefault();
-                    detach(mathjaxParent);
+
+                    // Don't detach the entire body.
+                    if (!(mathjaxParent === self._doc.body)) {
+                        event.preventDefault();
+                        detach(mathjaxParent);
+                    }
+                    
             }
 
             var selection = self._doc.getSelection();
