@@ -1233,13 +1233,13 @@ var spanToSemantic = {
     fontWeight: {
         regexp: /^bold/i,
         replace: function ( doc ) {
-            return createElement( doc, 'B' );
+            return createElement( doc, 'strong' );
         }
     },
     fontStyle: {
         regexp: /^italic/i,
         replace: function ( doc ) {
-            return createElement( doc, 'I' );
+            return createElement( doc, 'em' );
         }
     },
     fontFamily: {
@@ -1299,8 +1299,8 @@ var stylesRewriters = {
 
         return newTreeBottom || span;
     },
-    STRONG: replaceWithTag( 'B' ),
-    EM: replaceWithTag( 'I' ),
+    STRONG: replaceWithTag( 'strong' ),
+    EM: replaceWithTag( 'em' ),
     STRIKE: replaceWithTag( 'S' ),
     FONT: function ( node, parent ) {
         var face = node.face,
@@ -2222,12 +2222,8 @@ if ( isMac && isGecko && win.getSelection().modify ) {
     };
 }
 
-keyHandlers[ ctrlKey + 'b' ] = mapKeyToFormat( 'B' );
-keyHandlers[ ctrlKey + 'i' ] = mapKeyToFormat( 'I' );
-keyHandlers[ ctrlKey + 'u' ] = mapKeyToFormat( 'U' );
-keyHandlers[ ctrlKey + 'shift-7' ] = mapKeyToFormat( 'S' );
-keyHandlers[ ctrlKey + 'shift-5' ] = mapKeyToFormat( 'SUB', { tag: 'SUP' } );
-keyHandlers[ ctrlKey + 'shift-6' ] = mapKeyToFormat( 'SUP', { tag: 'SUB' } );
+keyHandlers[ ctrlKey + 'b' ] = mapKeyToFormat( 'strong' );
+keyHandlers[ ctrlKey + 'i' ] = mapKeyToFormat( 'em' );
 keyHandlers[ ctrlKey + 'shift-8' ] = mapKeyTo( 'makeUnorderedList' );
 keyHandlers[ ctrlKey + 'shift-9' ] = mapKeyTo( 'makeOrderedList' );
 keyHandlers[ ctrlKey + '[' ] = mapKeyTo( 'decreaseQuoteLevel' );
@@ -2516,19 +2512,11 @@ proto.addStyles = function ( styles ) {
     return this;
 };
 
-proto.bold = command( 'changeFormat', { tag: 'B' } );
-proto.italic = command( 'changeFormat', { tag: 'I' } );
-proto.underline = command( 'changeFormat', { tag: 'U' } );
-proto.strikethrough = command( 'changeFormat', { tag: 'S' } );
-proto.subscript = command( 'changeFormat', { tag: 'SUB' }, { tag: 'SUP' } );
-proto.superscript = command( 'changeFormat', { tag: 'SUP' }, { tag: 'SUB' } );
+proto.bold = command( 'changeFormat', { tag: 'strong' } );
+proto.italic = command( 'changeFormat', { tag: 'em' } );
 
-proto.removeBold = command( 'changeFormat', null, { tag: 'B' } );
-proto.removeItalic = command( 'changeFormat', null, { tag: 'I' } );
-proto.removeUnderline = command( 'changeFormat', null, { tag: 'U' } );
-proto.removeStrikethrough = command( 'changeFormat', null, { tag: 'S' } );
-proto.removeSubscript = command( 'changeFormat', null, { tag: 'SUB' } );
-proto.removeSuperscript = command( 'changeFormat', null, { tag: 'SUP' } );
+proto.removeBold = command( 'changeFormat', null, { tag: 'strong' } );
+proto.removeItalic = command( 'changeFormat', null, { tag: 'em' } );
 
 proto.makeLink = function ( url, attributes ) {
     var range = this.getSelection();
