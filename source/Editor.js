@@ -1233,11 +1233,13 @@ var spanToSemantic = {
     fontWeight: {
         regexp: /^bold/i,
         replace: function ( doc ) {
+            return createElement( doc, 'strong' );
         }
     },
     fontStyle: {
         regexp: /^italic/i,
         replace: function ( doc ) {
+            return createElement( doc, 'em' );
         }
     },
     fontFamily: {
@@ -2220,6 +2222,8 @@ if ( isMac && isGecko && win.getSelection().modify ) {
     };
 }
 
+keyHandlers[ ctrlKey + 'b' ] = mapKeyToFormat( 'strong' );
+keyHandlers[ ctrlKey + 'i' ] = mapKeyToFormat( 'em' );
 keyHandlers[ ctrlKey + 'shift-8' ] = mapKeyTo( 'makeUnorderedList' );
 keyHandlers[ ctrlKey + 'shift-9' ] = mapKeyTo( 'makeOrderedList' );
 keyHandlers[ ctrlKey + '[' ] = mapKeyTo( 'decreaseQuoteLevel' );
@@ -2508,7 +2512,11 @@ proto.addStyles = function ( styles ) {
     return this;
 };
 
+proto.bold = command( 'changeFormat', { tag: 'strong' } );
+proto.italic = command( 'changeFormat', { tag: 'em' } );
 
+proto.removeBold = command( 'changeFormat', null, { tag: 'strong' } );
+proto.removeItalic = command( 'changeFormat', null, { tag: 'em' } );
 
 proto.makeLink = function ( url, attributes ) {
     var range = this.getSelection();
