@@ -1299,8 +1299,8 @@ var stylesRewriters = {
 
         return newTreeBottom || span;
     },
-    STRONG: replaceWithTag( 'B' ),
-    EM: replaceWithTag( 'I' ),
+    STRONG: replaceWithTag( 'strong' ),
+    EM: replaceWithTag( 'em' ),
     STRIKE: replaceWithTag( 'S' ),
     FONT: function ( node, parent ) {
         var face = node.face,
