@@ -1908,12 +1908,16 @@ var keyHandlers = {
             // Using cloneNode means that the childNodes are not elements of the original node.
             while (childNodes.length != 1) {
                 ancestor.removeChild(childNodes[0]);
-            }            
-            ancestor.innerHTML = " <br>";
-            var ancestorRange = self._doc.createRange();
-            ancestorRange.setStartAfter(ancestor);
-            ancestorRange.setEndBefore(ancestor);
-            self.setSelection(ancestorRange);
+            }
+            
+            if (ancestor) {
+                ancestor.innerHTML = " <br>";
+
+                var ancestorRange = self._doc.createRange();
+                ancestorRange.setStartAfter(ancestor);
+                ancestorRange.setEndBefore(ancestor);
+                self.setSelection(ancestorRange);
+            }
         }
         // If at beginning of block, merge with previous
         else if ( rangeDoesStartAtBlockBoundary( range ) ) {
@@ -2016,8 +2020,11 @@ var keyHandlers = {
             var selection = self._doc.getSelection();
             var anchorNode = selection.anchorNode;
             var anchorOffset = selection.anchorOffset;
-            var previousSibling = anchorNode.previousSibling;
 
+            if (anchorNode) {
+                var previousSibling = anchorNode && anchorNode.previousSibling;
+            }
+            
             // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
 
             if (anchorNode.textContent && anchorNode.textContent.length) {
@@ -2145,7 +2152,10 @@ var keyHandlers = {
         if(!selection.anchorNode) { return; }
 
         var anchorNode = selection.anchorNode;
-        var anchorPreviousNode = anchorNode.previousSibling;
+
+        if (anchorNode) {
+            var anchorPreviousNode = anchorNode.previousSibling;
+        }
 
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
