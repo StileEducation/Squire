@@ -1909,7 +1909,8 @@ var keyHandlers = {
             while (childNodes.length != 1) {
                 ancestor.removeChild(childNodes[0]);
             }
-            
+
+            // IE9 can send the commonAncestorContainer of the range as undefined.
             if (ancestor) {
                 ancestor.innerHTML = " <br>";
 
@@ -2003,6 +2004,7 @@ var keyHandlers = {
                     (
                         (isIE9 && currentSearchNode.className.match('mathjax')) || 
                         (!isIE9 && currentSearchNode.classList.contains('mathjax'))
+                        // IE9 has no support for classList. It is only supported in 10+.
                     ) 
                 ) {
                     mathjaxSpan = currentSearchNode;
@@ -2021,14 +2023,14 @@ var keyHandlers = {
             var anchorNode = selection.anchorNode;
             var anchorOffset = selection.anchorOffset;
 
+            // A range can have no anchorNode in IE9.
             if (anchorNode) {
-                var previousSibling = anchorNode && anchorNode.previousSibling;
+                var previousSibling = anchorNode.previousSibling;
             }
             
             // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
-
             if (anchorNode.textContent && anchorNode.textContent.length) {
-                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1) && /[ ]/g.test(anchorNode.textContent);
+                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1) && /[ ]/g.test(anchorNode.textContent); // Confirm the anchorNode is empty and does not contain a character.
             } else {
                 var caretAtStartOfNode = !!(anchorOffset === 0);
             }
