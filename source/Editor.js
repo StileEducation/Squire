@@ -2149,15 +2149,13 @@ var keyHandlers = {
         var selection = self._doc.getSelection();
         // We're not interested in things that are not Carets.
         if (!selection.isCollapsed) { return; }
-        
-        // or anything that doesn't have an anchorNode.
-        if(!selection.anchorNode) { return; }
 
         var anchorNode = selection.anchorNode;
+        
+        // We're not interested in ranges that do not have an anchorNode.
+        if (!anchorNode) { return; }
 
-        if (anchorNode) {
-            var anchorPreviousNode = anchorNode.previousSibling;
-        }
+        var anchorPreviousNode = anchorNode.previousSibling;
 
         // Test conditions for selection being at the start of the textnode.
         var validNodes = !!(anchorNode && anchorPreviousNode);
