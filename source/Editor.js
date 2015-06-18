@@ -2021,7 +2021,7 @@ var keyHandlers = {
             // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
 
             if (anchorNode.textContent && anchorNode.textContent.length) {
-                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1);
+                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1) && /[ ]/g.test(anchorNode.textContent);
             } else {
                 var caretAtStartOfNode = !!(anchorOffset === 0);
             }
