@@ -1995,7 +1995,12 @@ var keyHandlers = {
             var mathjaxSpan = null;
 
             while ( currentSearchNode !== self._doc.body) {
-                if (currentSearchNode.nodeType === ELEMENT_NODE && currentSearchNode.classList.contains('mathjax')) {
+                if (currentSearchNode.nodeType === ELEMENT_NODE && 
+                    (
+                        (isIE9 && currentSearchNode.className.match('mathjax')) || 
+                        (!isIE9 && currentSearchNode.classList.contains('mathjax'))
+                    ) 
+                ) {
                     mathjaxSpan = currentSearchNode;
                     break;
                 }
