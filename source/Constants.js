@@ -17,7 +17,6 @@ var win = doc.defaultView;
 
 var ua = navigator.userAgent;
 
-var isIE9 = ua.match('MSIE 9');
 var isIOS = /iP(?:ad|hone|od)/.test( ua );
 var isMac = /Mac OS X/.test( ua );
 

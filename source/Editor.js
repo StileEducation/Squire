@@ -2010,17 +2010,11 @@ var keyHandlers = {
             var mathjaxSpan = null;
 
             while ( currentSearchNode !== self._doc.body) {
-                if (currentSearchNode.nodeType === ELEMENT_NODE && 
-                    (
-                        (isIE9 && currentSearchNode.className.match('mathjax')) || 
-                        (!isIE9 && currentSearchNode.classList.contains('mathjax'))
-                        // IE9 has no support for classList. It is only supported in 10+.
-                    ) 
-                ) {
+                if (currentSearchNode.nodeType === ELEMENT_NODE && elMatchesSelector(currentSearchNode, '.mathjax')) {
                     mathjaxSpan = currentSearchNode;
                     break;
                 }
-                
+
                 currentSearchNode = currentSearchNode.parentNode;
             }
 
