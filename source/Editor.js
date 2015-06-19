@@ -14,6 +14,16 @@ function getSquireInstance ( doc ) {
     return null;
 }
 
+//Polyfill for element.matches, makes things much less sucky
+function elMatchesSelector(el, selector) {
+    var matchFn = el.matches || el.matchesSelector || el.webkitMatchesSelector || el.msMatchesSelector;
+    if (!matchFn) {
+        throw new Error('This browser appears to have no Element.matches implementation');
+    }
+
+    return matchFn.bind(el)(selector);
+}
+
 function Squire ( doc ) {
     var win = doc.defaultView;
     var body = doc.body;
@@ -1908,12 +1918,17 @@ var keyHandlers = {
             // Using cloneNode means that the childNodes are not elements of the original node.
             while (childNodes.length != 1) {
                 ancestor.removeChild(childNodes[0]);
-            }            
-            ancestor.innerHTML = " <br>";
-            var ancestorRange = self._doc.createRange();
-            ancestorRange.setStartAfter(ancestor);
-            ancestorRange.setEndBefore(ancestor);
-            self.setSelection(ancestorRange);
+            }
+
+            // IE9 can send the commonAncestorContainer of the range as undefined.
+            if (ancestor) {
+                ancestor.innerHTML = " <br>";
+
+                var ancestorRange = self._doc.createRange();
+                ancestorRange.setStartAfter(ancestor);
+                ancestorRange.setEndBefore(ancestor);
+                self.setSelection(ancestorRange);
+            }
         }
         // If at beginning of block, merge with previous
         else if ( rangeDoesStartAtBlockBoundary( range ) ) {
@@ -1995,11 +2010,11 @@ var keyHandlers = {
             var mathjaxSpan = null;
 
             while ( currentSearchNode !== self._doc.body) {
-                if (currentSearchNode.nodeType === ELEMENT_NODE && currentSearchNode.classList.contains('mathjax')) {
+                if (currentSearchNode.nodeType === ELEMENT_NODE && elMatchesSelector(currentSearchNode, '.mathjax')) {
                     mathjaxSpan = currentSearchNode;
                     break;
                 }
-                
+
                 currentSearchNode = currentSearchNode.parentNode;
             }
 
@@ -2011,12 +2026,15 @@ var keyHandlers = {
             var selection = self._doc.getSelection();
             var anchorNode = selection.anchorNode;
             var anchorOffset = selection.anchorOffset;
-            var previousSibling = anchorNode.previousSibling;
 
+            // A range can have no anchorNode in IE9.
+            if (anchorNode) {
+                var previousSibling = anchorNode.previousSibling;
+            }
+            
             // Delete the equation if we are trying to delete the space infront of it, no browser copes well with a span tag sitting in the DOM with no text nodes next to it.
-
             if (anchorNode.textContent && anchorNode.textContent.length) {
-                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1);
+                var caretAtStartOfNode = !!(anchorOffset === 0) || !!(anchorOffset === 1 && anchorNode.textContent.length === 1) && /[ ]/g.test(anchorNode.textContent); // Confirm the anchorNode is empty and does not contain a character.
             } else {
                 var caretAtStartOfNode = !!(anchorOffset === 0);
             }
@@ -2026,11 +2044,8 @@ var keyHandlers = {
                 // Is an empty text node, backspace has been pressed
                 // and it's previous sibling is a mathjax equation
                 // then remove both elements.
-                var isMathjaxIOS = !!(previousSibling.webkitMatchesSelector && previousSibling.webkitMatchesSelector('span.mathjax'));
-                var isMathjaxIE = !!(previousSibling.msMatchesSelector && previousSibling.msMatchesSelector('span.mathjax'));
-                var isMathjax  = !!(previousSibling.matches && previousSibling.matches('span.mathjax'));
-                
-                if (isMathjaxIOS || isMathjaxIE || isMathjax) {
+                var isMathjax = elMatchesSelector(previousSibling, 'span.mathjax');
+                if (isMathjax) {
                     event.preventDefault();
                     detach(previousSibling);
                 }
@@ -2135,11 +2150,12 @@ var keyHandlers = {
         var selection = self._doc.getSelection();
         // We're not interested in things that are not Carets.
         if (!selection.isCollapsed) { return; }
-        
-        // or anything that doesn't have an anchorNode.
-        if(!selection.anchorNode) { return; }
 
         var anchorNode = selection.anchorNode;
+        
+        // We're not interested in ranges that do not have an anchorNode.
+        if (!anchorNode) { return; }
+
         var anchorPreviousNode = anchorNode.previousSibling;
 
         // Test conditions for selection being at the start of the textnode.
@@ -2147,14 +2163,12 @@ var keyHandlers = {
         var caretAtStartOfNode = selection.anchorOffset === 0;
         
         // Test is SPAN and has mathjax class.
-        var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
-        var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
-        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+        var isMathjax = !!(validNodes && elMatchesSelector(anchorPreviousNode, 'span.mathjax'));
 
         // create a range to set the selection to.
         var leftRange = self._doc.createRange();
 
-        if (caretAtStartOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
+        if (caretAtStartOfNode && isMathjax) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
@@ -2186,11 +2200,9 @@ var keyHandlers = {
         var caretIsAtEndOfNode = selection.anchorOffset === anchorNode.textContent.length;
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
-        var isMathjaxIOS = !!(validNodes && anchorNextNode.webkitMatchesSelector && anchorNextNode.webkitMatchesSelector('span.mathjax'));
-        var isMathjaxIE = !!(validNodes && anchorNextNode.msMatchesSelector && anchorNextNode.msMatchesSelector('span.mathjax'));
-        var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
+        var isMathjax = !!(validNodes && elMatchesSelector(anchorNextNode, 'span.mathjax'));
 
-        if (caretIsAtEndOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
+        if (caretIsAtEndOfNode && isMathjax) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
