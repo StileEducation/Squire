@@ -14,6 +14,16 @@ function getSquireInstance ( doc ) {
     return null;
 }
 
+//Polyfill for element.matches, makes things much less sucky
+function elMatchesSelector(el, selector) {
+    var matchFn = el.matches || el.matchesSelector || el.webkitMatchesSelector || el.msMatchesSelector;
+    if (!matchFn) {
+        throw new Error('This browser appears to have no Element.matches implementation');
+    }
+
+    return matchFn.bind(el)(selector);
+}
+
 function Squire ( doc ) {
     var win = doc.defaultView;
     var body = doc.body;
@@ -2040,11 +2050,8 @@ var keyHandlers = {
                 // Is an empty text node, backspace has been pressed
                 // and it's previous sibling is a mathjax equation
                 // then remove both elements.
-                var isMathjaxIOS = !!(previousSibling.webkitMatchesSelector && previousSibling.webkitMatchesSelector('span.mathjax'));
-                var isMathjaxIE = !!(previousSibling.msMatchesSelector && previousSibling.msMatchesSelector('span.mathjax'));
-                var isMathjax  = !!(previousSibling.matches && previousSibling.matches('span.mathjax'));
-                
-                if (isMathjaxIOS || isMathjaxIE || isMathjax) {
+                var isMathjax = elMatchesSelector(previousSibling, 'span.mathjax');
+                if (isMathjax) {
                     event.preventDefault();
                     detach(previousSibling);
                 }
@@ -2162,14 +2169,12 @@ var keyHandlers = {
         var caretAtStartOfNode = selection.anchorOffset === 0;
         
         // Test is SPAN and has mathjax class.
-        var isMathjaxIOS = !!(validNodes && anchorPreviousNode.webkitMatchesSelector && anchorPreviousNode.webkitMatchesSelector('span.mathjax'));
-        var isMathjaxIE = !!(validNodes && anchorPreviousNode.msMatchesSelector && anchorPreviousNode.msMatchesSelector('span.mathjax'));
-        var isMathjax  = !!(validNodes && anchorPreviousNode.matches && anchorPreviousNode.matches('span.mathjax'));
+        var isMathjax = !!(validNodes && elMatchesSelector(anchorPreviousNode, 'span.mathjax'));
 
         // create a range to set the selection to.
         var leftRange = self._doc.createRange();
 
-        if (caretAtStartOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
+        if (caretAtStartOfNode && isMathjax) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
@@ -2201,11 +2206,9 @@ var keyHandlers = {
         var caretIsAtEndOfNode = selection.anchorOffset === anchorNode.textContent.length;
         var validNodes = !!(anchorNode && anchorNextNode);
         // Test is SPAN and has mathjax class.
-        var isMathjaxIOS = !!(validNodes && anchorNextNode.webkitMatchesSelector && anchorNextNode.webkitMatchesSelector('span.mathjax'));
-        var isMathjaxIE = !!(validNodes && anchorNextNode.msMatchesSelector && anchorNextNode.msMatchesSelector('span.mathjax'));
-        var isMathjax  = !!(validNodes && anchorNextNode.matches && anchorNextNode.matches('span.mathjax'));
+        var isMathjax = !!(validNodes && elMatchesSelector(anchorNextNode, 'span.mathjax'));
 
-        if (caretIsAtEndOfNode && (isMathjax || isMathjaxIE || isMathjaxIOS)) {
+        if (caretIsAtEndOfNode && isMathjax) {
             // this is a mathjax equation, prevent defualt.
             event.preventDefault();
 
